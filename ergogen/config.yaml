@@ -1,0 +1,409 @@
+units:
+  # Proxy Spacing Variables
+  kx: cx
+  ky: cy
+
+  # Padding Variables
+  padding: 2
+  px: kx + padding
+  py: ky + padding
+
+  nnpx: 4
+  nnppx: 4
+  nnpy: 1
+  nnx: 17.78
+  nny: 33
+
+  pcb_fillet: 2
+
+points:
+  key:
+    padding: 1ky
+    spread: 1kx
+
+  zones:
+    finger:
+      anchor:
+        shift: [100, -100]
+      columns:
+        pinky:
+          key:
+            splay: 8
+            column_net: P024
+        ring:
+          key:
+            stagger: 0.5ky
+            splay: -4
+            spread: kx+.8
+            column_net: P100
+        middle:
+          key:
+            stagger: 0.3ky
+            splay: -4
+            spread: kx+.8
+            column_net: P011
+        index:
+          key:
+            stagger: -0.2ky
+            column_net: P104
+        inner:
+          key:
+            stagger: -0.1ky
+            column_net: P106
+      rows:
+        bottom:
+          row_net: P010
+        home:
+          row_net: P111
+        top:
+          row_net: P113
+    thumb:
+      anchor:
+        ref: finger_middle_bottom
+        shift: [8, -24]
+      columns:
+        thumb1:
+          key:
+            column_net: P100
+        thumb2:
+          key:
+            splay: -8
+            shift: [1.5, -1.3]
+            column_net: P011
+        thumb3:
+          key:
+            splay: -8
+            shift: [3, -2.5]
+            column_net: P104
+        thumb4:
+          key:
+            splay: -8
+            shift: [4.5, -3.3]
+            column_net: P106
+      rows:
+        cluster:
+          row_net: P009
+
+  mirror:
+    ref: finger_inner_top
+    distance: 100
+    
+outlines:
+  raw:
+    - what: rectangle
+      where: true
+      size: [kx, ky]
+  keys:
+    - what: rectangle
+      where: true
+      size: [kx-1, ky-1]
+
+  board_left:
+    - what: polygon
+      operation: stack
+      points:
+        - { ref: finger_pinky_top, shift: [-0.5px,0.5py] }
+        - { ref: finger_ring_top, shift: [-0.5px,0.5py] }
+        - { ref: finger_middle_top, shift: [-0.5px,0.5py] }
+        - { ref: finger_middle_top, shift: [0.5px,0.5py] }
+        - { ref: finger_index_top, shift: [0.5px,0.5py] }
+        - { ref: finger_inner_top, shift: [0.5px,0.5py] }
+        - { ref: finger_inner_top, shift: [0.5px + nnpx + nnx + nnppx, 0.5py] }
+        - { ref: finger_inner_top, shift: [0.5px + nnpx + nnx + nnppx, 0.5py - 66] }
+        - { ref: thumb_thumb4_cluster, shift: [0.5px,0.5py] }
+        - { ref: thumb_thumb4_cluster, shift: [0.5px,-0.5py] }
+        - { ref: thumb_thumb3_cluster, shift: [0.5px,-0.5py] }
+        - { ref: thumb_thumb2_cluster, shift: [0.5px,-0.5py] }
+        - { ref: thumb_thumb1_cluster, shift: [0.5px,-0.5py] }
+        - { ref: thumb_thumb1_cluster, shift: [-0.5px,-0.5py] }
+        - { ref: finger_pinky_bottom, shift: [-0.5px,-0.5py] }
+      fillet: pcb_fillet
+
+  board_right:
+    - what: polygon
+      operation: stack
+      points:
+        - { ref: mirror_finger_pinky_top, shift: [-0.5px,0.5py] }
+        - { ref: mirror_finger_ring_top, shift: [-0.5px,0.5py] }
+        - { ref: mirror_finger_middle_top, shift: [-0.5px,0.5py] }
+        - { ref: mirror_finger_middle_top, shift: [0.5px,0.5py] }
+        - { ref: mirror_finger_index_top, shift: [0.5px,0.5py] }
+        - { ref: mirror_finger_inner_top, shift: [0.5px,0.5py] }
+        - { ref: mirror_finger_inner_top, shift: [0.5px + nnpx + nnx + nnppx, 0.5py] }
+        - { ref: mirror_finger_inner_top, shift: [0.5px + nnpx + nnx + nnppx, 0.5py - 66] }
+        - { ref: mirror_thumb_thumb4_cluster, shift: [0.5px,0.5py] }
+        - { ref: mirror_thumb_thumb4_cluster, shift: [0.5px,-0.5py] }
+        - { ref: mirror_thumb_thumb3_cluster, shift: [0.5px,-0.5py] }
+        - { ref: mirror_thumb_thumb2_cluster, shift: [0.5px,-0.5py] }
+        - { ref: mirror_thumb_thumb1_cluster, shift: [0.5px,-0.5py] }
+        - { ref: mirror_thumb_thumb1_cluster, shift: [-0.5px,-0.5py] }
+        - { ref: mirror_finger_pinky_bottom, shift: [-0.5px,-0.5py] }
+      fillet: pcb_fillet
+
+  combo:
+    - name: board_left
+    - { operation: stack, name: board_right }
+    - { operation: stack, name: keys }
+pcbs:
+  left:
+    outlines:
+      main:
+        outline: board_left
+    footprints:
+      choc:
+        what: choc
+        where: /^(finger|thumb)_.*/
+        params:
+          keycaps: true
+          reverse: false
+          hotswap: true
+          from: "{{column_net}}"
+          to: "{{colrow}}"
+      diode:
+        what: diode_smd
+        where: /^(finger|thumb)_.*/
+        params:
+          from: "{{colrow}}"
+          to: "{{row_net}}"
+        adjust:
+          shift: [6.5, -5]
+          rotate: 90
+
+      via_column_top:
+        what: via
+        where: /^finger_(ring|middle|index|inner)_.*/
+        params:
+          net: "{{column_net}}"
+        adjust:
+          shift: [-3.26, -5.5]
+
+      via_column_bottom:
+        what: via
+        where: /^finger_(ring|middle|index|inner)_.*/
+        params:
+          net: "{{column_net}}"
+        adjust:
+          shift: [-3.26, -7.5]
+
+      nice_nano:
+        what: nice_nano
+        params:
+          orientation: "up"
+        where:
+          ref.aggregate.parts: [finger_inner_top]
+          shift: [20,-8.5]
+          rotate: 270
+      nice_view:
+        what: nice_view
+        params:
+          side: "F"
+          MOSI: P017
+          SCK: P020
+          CS: P006
+        where:
+          ref.aggregate.parts: [finger_inner_top]
+          shift: [22.5,-29]
+          rotate: 90
+      reset_switch:
+        what: EVQPUC
+        params: 
+          side: B
+          from: GND
+          to: RST 
+        where:
+          ref: finger_inner_top
+          shift: [33.5, -13]
+          rotate: -90.0
+      battery_connector:
+        what: jstph
+        where:
+          ref: finger_inner_top
+          shift: [32, -27]
+          rotate: 0
+        params:
+            side: B
+            pos: pos
+            neg: GND
+      battery_switch:
+        what: slider
+        where:
+            ref: finger_inner_top
+            shift: [33.5, -1]
+            rotate: -90
+        params:
+            side: B
+            from: pos
+            to: RAW
+
+      # Mounting holes
+      hole_top_left:
+        what: mountinghole
+        where:
+          ref: finger_ring_top
+          shift: [-0.75kx, 0.25ky]
+      hole_bottom_left:
+        what: mountinghole
+        where:
+          ref: thumb_thumb1_cluster
+          shift: [-0.8kx, -0.3ky]
+      hole_bottom_right:
+        what: mountinghole
+        where:
+          ref: thumb_thumb4_cluster
+          shift: [-0.05kx, 0.75ky]
+      hole_top_right:
+        what: mountinghole
+        where:
+          ref: finger_inner_top
+          shift: [0.5kx + 23.3, 0.5ky - 2.5]
+      hole_center:
+        what: mountinghole
+        where:
+          ref: finger_middle_home
+          shift: [0.5kx, -0.5ky]
+
+      # Write "Caldera" on the PCB
+      front_text: &text
+        what: text
+        where: &textWhere
+          ref: finger_pinky_bottom
+          shift: [12, -8]
+        params: &textParams
+          text: Don't\nPanic
+          justify: left
+          h_size: 3.0
+          v_size: 3.0
+          thickness: 0.4
+
+  right:
+    outlines:
+      main:
+        outline: board_right
+    footprints:
+      choc:
+        what: choc
+        where: /^mirror_(finger|thumb)_.*/
+        params:
+          keycaps: true
+          reverse: false
+          hotswap: true
+          from: "{{column_net}}"
+          to: "{{colrow}}"
+      diode:
+        what: diode_smd
+        where: /^mirror_(finger|thumb)_.*/
+        params:
+          from: "{{colrow}}"
+          to: "{{row_net}}"
+        adjust:
+          shift: [-6.5, -5]
+          rotate: 270
+
+      via_column_top:
+        what: via
+        where: /^mirror_finger_(pinky|ring|middle|index|inner)_.*/
+        params:
+          net: "{{column_net}}"
+        adjust:
+          shift: [3.26, -5.5]
+
+      via_column_bottom:
+        what: via
+        where: /^mirror_finger_(pinky|ring|middle|index|inner)_.*/
+        params:
+          net: "{{column_net}}"
+        adjust:
+          shift: [3.26, -7.5]
+
+      nice_nano:
+        what: nice_nano
+        params:
+          orientation: "up"
+        where:
+          ref.aggregate.parts: [mirror_finger_inner_top]
+          shift: [-20,-8.5]
+          rotate: 270
+      nice_view:
+        what: nice_view
+        params:
+          side: "F"
+          MOSI: P017
+          SCK: P020
+          CS: P006
+        where:
+          ref.aggregate.parts: [mirror_finger_inner_top]
+          shift: [-22.5,-29]
+          rotate: 90
+      reset_switch:
+        what: EVQPUC
+        params: 
+          side: B
+          from: GND
+          to: RST 
+        where:
+          ref: mirror_finger_inner_top
+          shift: [33.5, -13]
+          rotate: -90.0
+      battery_connector:
+        what: jstph
+        where:
+          ref: mirror_finger_inner_top
+          shift: [32, -27]
+          rotate: 0
+        params:
+            side: B
+            pos: pos
+            neg: GND
+      battery_switch:
+        what: slider
+        where:
+            ref: mirror_finger_inner_top
+            shift: [33.5, -1]
+            rotate: -90
+        params:
+            side: B
+            from: pos
+            to: RAW
+
+      # Mounting holes
+      hole_top_left:
+        what: mountinghole
+        where:
+          ref: mirror_finger_ring_top
+          shift: [-0.75kx, 0.25ky]
+      hole_bottom_left:
+        what: mountinghole
+        where:
+          ref: mirror_thumb_thumb1_cluster
+          shift: [-0.8kx, -0.3ky]
+      hole_bottom_right:
+        what: mountinghole
+        where:
+          ref: mirror_thumb_thumb4_cluster
+          shift: [-0.05kx, 0.75ky]
+      hole_top_right:
+        what: mountinghole
+        where:
+          ref: mirror_finger_inner_top
+          shift: [0.5kx + 23.3, 0.5ky - 2.5]
+      hole_center:
+        what: mountinghole
+        where:
+          ref: mirror_finger_middle_home
+          shift: [0.5kx, -0.5ky]
+
+      # Write "Caldera" on the PCB
+      front_text:
+        what: text
+        where:
+          ref: mirror_finger_pinky_bottom
+          shift: [26, -8]
+        params:
+          text: Don't\nPanic
+          justify: left
+          h_size: 3.0
+          v_size: 3.0
+          thickness: 0.4
+
+
+

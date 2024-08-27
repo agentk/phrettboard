@@ -1,0 +1,5 @@
+config SHIELD_PHRETT_LEFT
+    def_bool $(shields_list_contains,phrett_left)
+
+config SHIELD_PHRETT_RIGHT
+    def_bool $(shields_list_contains,phrett_right)

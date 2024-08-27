@@ -1,0 +1,3 @@
+phrett:
+	@./zmk.sh phrett
+

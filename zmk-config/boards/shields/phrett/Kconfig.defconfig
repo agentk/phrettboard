@@ -1,0 +1,13 @@
+if SHIELD_PHRETT_LEFT
+
+    config ZMK_KEYBOARD_NAME
+        default "Phrettboard"
+
+    config ZMK_SPLIT_BLE_ROLE_CENTRAL
+        default y
+endif
+
+if SHIELD_PHRETT_LEFT || SHIELD_PHRETT_RIGHT
+    config ZMK_SPLIT
+        default y
+endif
